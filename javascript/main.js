@@ -1,158 +1,53 @@
-// Frank Poth 04/18/2018
-
-/* Changes:
-
-  1. Added the drawing calls for drawing the grass and carrots in render.
-  2. Added a p element for showing the number of carrots collected.
-
-*/
 
 window.addEventListener("load", function(event) {
 
   "use strict";
 
-  //// CONSTANTS ////
-
-  const ZONE_PREFIX = "07/zone";
-  const ZONE_SUFFIX = ".json";
-
-      /////////////////
-    //// CLASSES ////
-  /////////////////
-
-  const AssetsManager = function() {
-
-    this.tile_set_image = undefined;
-
-  };
-
-  AssetsManager.prototype = {
-
-    constructor: Game.AssetsManager,
-
-    requestJSON:function(url, callback) {
-
-      let request = new XMLHttpRequest();
-
-      request.addEventListener("load", function(event) {
-
-        callback(JSON.parse(this.responseText));
-
-      }, { once:true });
-
-      request.open("GET", url);
-      request.send();
-
-    },
-
-    requestImage:function(url, callback) {
-
-      let image = new Image();
-
-      image.addEventListener("load", function(event) {
-
-        callback(image);
-
-      }, { once:true });
-
-      image.src = url;
-
-    },
-
-  };
-
       ///////////////////
     //// FUNCTIONS ////
   ///////////////////
 
+  /* This used to be in the Controller class, but I moved it out to the main file.
+  The reason being that later on in development I might need to do something with
+  display or processing directly on an input event in addition to updating the controller.
+  To prevent referencing those components inside of my controller logic, I moved
+  all of my event handlers here, to the main file. */
   var keyDownUp = function(event) {
 
     controller.keyDownUp(event.type, event.keyCode);
 
   };
 
+  /* I also moved this handler out of Display since part 1 of this series. The reason
+  being that I need to reference game as well as display to resize the canvas according
+  to the dimensions of the game world. I don't want to reference game inside of my
+  Display class, so I moved the resize method into the main file. */
   var resize = function(event) {
 
-    display.resize(document.documentElement.clientWidth, document.documentElement.clientHeight, game.world.height / game.world.width);
+    display.resize(document.documentElement.clientWidth - 32, document.documentElement.clientHeight - 32, game.world.height / game.world.width);
     display.render();
-
-    var rectangle = display.context.canvas.getBoundingClientRect();
-
-    p.style.left = rectangle.left + "px";
-    p.style.top  = rectangle.top + "px";
-    p.style.fontSize = game.world.tile_set.tile_size * rectangle.height / game.world.height + "px";
 
   };
 
   var render = function() {
 
-    var frame = undefined;
-
-    display.drawMap   (assets_manager.tile_set_image,
-    game.world.tile_set.columns, game.world.graphical_map, game.world.columns,  game.world.tile_set.tile_size);
-
-    for (let index = game.world.carrots.length - 1; index > -1; -- index) {
-
-      let carrot = game.world.carrots[index];
-
-      frame = game.world.tile_set.frames[carrot.frame_value];
-
-      display.drawObject(assets_manager.tile_set_image,
-      frame.x, frame.y,
-      carrot.x + Math.floor(carrot.width * 0.5 - frame.width * 0.5) + frame.offset_x,
-      carrot.y + frame.offset_y, frame.width, frame.height);
-
+    display.fill(game.world.background_color);// Clear background to game's background color.
+    // display.drawRectangle(game.world.player.x, game.world.player.y, game.world.player.width, game.world.player.height, game.world.player.color);
+    display.drawBlock(game.world.blockStacked, "#000000");
+    if (game.world.currentTetromino != null) {
+      display.drawCurrentTetromino(game.world.currentTetromino.getBlocks(), game.world.currentTetromino.getColor());
     }
-
-    frame = game.world.tile_set.frames[game.world.player.frame_value];
-
-    display.drawObject(assets_manager.tile_set_image,
-    frame.x, frame.y,
-    game.world.player.x + Math.floor(game.world.player.width * 0.5 - frame.width * 0.5) + frame.offset_x,
-    game.world.player.y + frame.offset_y, frame.width, frame.height);
-
-    for (let index = game.world.grass.length - 1; index > -1; -- index) {
-
-      let grass = game.world.grass[index];
-
-      frame = game.world.tile_set.frames[grass.frame_value];
-
-      display.drawObject(assets_manager.tile_set_image,
-      frame.x, frame.y,
-      grass.x + frame.offset_x,
-      grass.y + frame.offset_y, frame.width, frame.height);
-
-    }
-
-    p.innerHTML = "Carrots: " + game.world.carrot_count;
-
     display.render();
 
   };
 
   var update = function() {
 
-    if (controller.left.active ) { game.world.player.moveLeft ();                               }
-    if (controller.right.active) { game.world.player.moveRight();                               }
-    if (controller.up.active   ) { game.world.player.jump();      controller.up.active = false; }
+    if (controller.left.active)  { game.world.player.moveLeft();  }
+    if (controller.right.active) { game.world.player.moveRight(); }
+    if (controller.up.active)    { game.world.player.jump(); controller.up.active = false; }
 
     game.update();
-
-    if (game.world.door) {
-
-      engine.stop();
-
-      assets_manager.requestJSON(ZONE_PREFIX + game.world.door.destination_zone + ZONE_SUFFIX, (zone) => {
-
-        game.world.setup(zone);
-
-        engine.start();
-
-      });
-
-      return;
-
-    }
 
   };
 
@@ -160,42 +55,27 @@ window.addEventListener("load", function(event) {
     //// OBJECTS ////
   /////////////////
 
-  var assets_manager = new AssetsManager();
-  var controller     = new Controller();
-  var display        = new Display(document.querySelector("canvas"));
-  var game           = new Game();
-  var engine         = new Engine(1000/30, render, update);
-
-  var p              = document.createElement("p");
-  p.setAttribute("style", "color:#c07000; font-size:2.0em; position:fixed;");
-  p.innerHTML = "Carrots: 0";
-  document.body.appendChild(p);
+  var controller = new Controller();
+  var display    = new Display(document.querySelector("canvas"));
+  var game       = new Game();
+  var engine     = new Engine(1000/30, render, update);
 
       ////////////////////
     //// INITIALIZE ////
   ////////////////////
 
+  /* This is very important. The buffer canvas must be pixel for pixel the same
+  size as the world dimensions to properly scale the graphics. All the game knows
+  are player location and world dimensions. We have to tell the display to match them. */
   display.buffer.canvas.height = game.world.height;
-  display.buffer.canvas.width  = game.world.width;
-  display.buffer.imageSmoothingEnabled = false;
-
-  assets_manager.requestJSON(ZONE_PREFIX + game.world.zone_id + ZONE_SUFFIX, (zone) => {
-
-    game.world.setup(zone);
-
-    assets_manager.requestImage("rabbit-trap.png", (image) => {
-
-      assets_manager.tile_set_image = image;
-
-      resize();
-      engine.start();
-
-    });
-
-  });
+  display.buffer.canvas.width = game.world.width;
 
   window.addEventListener("keydown", keyDownUp);
-  window.addEventListener("keyup"  , keyDownUp);
-  window.addEventListener("resize" , resize);
+  window.addEventListener("keyup",   keyDownUp);
+  window.addEventListener("resize",  resize);
+
+  resize();
+
+  engine.start();
 
 });

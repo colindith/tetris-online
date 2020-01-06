@@ -1,49 +1,73 @@
-// Frank Poth 04/03/2018
-
-/* Changes:
-1. Removed the TileSheet class from part 3 and added the Game.World.TileSet class to Game.
-2. Changed the drawMap function to be as generic as posible.
-3. Changed the drawPlayer function to the drawObject function. */
 
 const Display = function(canvas) {
+  this.colorTable = {
+    1: "#66ffff",     // I
+    2: "#ffff00",     // O
+    3: "#ff00ff",     // T
+    4: "#ff9900",     // J
+    5: "#0000ff",     // L
+    6: "#ff3300",     // S
+    7: "#66ff33"      // Z
+  }
 
   this.buffer  = document.createElement("canvas").getContext("2d"),
   this.context = canvas.getContext("2d");
 
-  /* This function draws the map to the buffer. */
-  this.drawMap = function(image, image_columns, map, map_columns, tile_size) {
-
-    for (let index = map.length - 1; index > -1; -- index) {
-
-      let value         = map[index];
-      let source_x      =           (value % image_columns) * tile_size;
-      let source_y      = Math.floor(value / image_columns) * tile_size;
-      let destination_x =           (index % map_columns  ) * tile_size;
-      let destination_y = Math.floor(index / map_columns  ) * tile_size;
-
-      this.buffer.drawImage(image, source_x, source_y, tile_size, tile_size, destination_x, destination_y, tile_size, tile_size);
-
+  this.drawBlock = function(blockStacked, color) {
+    width = 1
+    height = 1
+    
+    // console.log("blockStacked", blockStacked)
+    for (i = 0; i<22; i++) {
+      for (j = 0; j<10; j++) {
+        if (blockStacked[i][j] == 0) {
+          this.buffer.fillStyle = color;
+          
+        } else{
+          this.buffer.fillStyle = this.colorTable[blockStacked[i][j]];
+        }
+        
+        this.buffer.fillRect(Math.floor(20+j*2), Math.floor(10+i*2), width, height);
+      }
+    }
+    
+  };
+  this.drawCurrentTetromino = function(positions, color) {
+    for (i=0; i<positions.length; i++){
+      this.buffer.fillStyle = color;
+      this.buffer.fillRect(Math.floor(20+positions[i][0]*2), Math.floor(10+positions[i][1]*2), width, height);
     }
 
-  };
-
-  this.drawObject = function(image, source_x, source_y, destination_x, destination_y, width, height) {
-
-    this.buffer.drawImage(image, source_x, source_y, width, height, Math.round(destination_x), Math.round(destination_y), width, height);
 
   };
+
+  this.drawRectangle = function(x, y, width, height, color) {
+
+    this.buffer.fillStyle = color;
+    this.buffer.fillRect(Math.floor(x), Math.floor(y), width, height);
+
+  };
+
+  this.fill = function(color) {
+
+    this.buffer.fillStyle = color;
+    this.buffer.fillRect(0, 0, this.buffer.canvas.width, this.buffer.canvas.height);
+
+  };
+
+  this.render = function() { this.context.drawImage(this.buffer.canvas, 0, 0, this.buffer.canvas.width, this.buffer.canvas.height, 0, 0, this.context.canvas.width, this.context.canvas.height); };
 
   this.resize = function(width, height, height_width_ratio) {
 
     if (height / width > height_width_ratio) {
 
       this.context.canvas.height = width * height_width_ratio;
-      this.context.canvas.width  = width;
+      this.context.canvas.width = width;
 
     } else {
 
       this.context.canvas.height = height;
-      this.context.canvas.width  = height / height_width_ratio;
+      this.context.canvas.width = height / height_width_ratio;
 
     }
 
@@ -55,8 +79,6 @@ const Display = function(canvas) {
 
 Display.prototype = {
 
-  constructor : Display,
-
-  render:function() { this.context.drawImage(this.buffer.canvas, 0, 0, this.buffer.canvas.width, this.buffer.canvas.height, 0, 0, this.context.canvas.width, this.context.canvas.height); },
+  constructor : Display
 
 };
