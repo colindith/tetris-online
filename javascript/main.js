@@ -43,10 +43,51 @@ window.addEventListener("load", function(event) {
 
   var update = function() {
 
-    if (controller.left.active)  { game.world.player.moveLeft();  }
-    if (controller.right.active) { game.world.player.moveRight(); }
-    if (controller.up.active)    { game.world.player.jump(); controller.up.active = false; }
-
+    if (controller.left.active && (controller.left.delayCount == 0))  {
+      game.world.controlLeft();
+      if (controller.left.inAutoShift){
+        controller.left.delayCount = game.world.settings.autoRepeatInterval
+      } else {
+        controller.left.inAutoShift = true
+        controller.left.delayCount = game.world.settings.autoRepeatDelay
+      }
+    }
+    if (!controller.left.active) {
+      controller.left.delayCount = 0
+      controller.left.inAutoShift = false
+    }
+    if (controller.left.delayCount > 0 ){
+      controller.left.delayCount -= 1
+    }
+    
+    // TODO: This code is extremely ugly, fix it
+    if (controller.right.active && (controller.right.delayCount == 0))  {
+      game.world.controlRight();
+      if (controller.right.inAutoShift){
+        controller.right.delayCount = game.world.settings.autoRepeatInterval
+      } else {
+        controller.right.inAutoShift = true
+        controller.right.delayCount = game.world.settings.autoRepeatDelay
+      }
+    }
+    if (!controller.right.active) {
+      controller.right.delayCount = 0
+      controller.right.inAutoShift = false
+    }
+    if (controller.right.delayCount > 0 ){
+      controller.right.delayCount -= 1
+    }
+    
+    if (controller.up.active && (controller.up.delayCount == 0))  {
+      game.world.controlRotateRight();
+      controller.up.delayCount = game.world.settings.autoRepeatInterval
+    }
+    if (!controller.up.active) {
+      controller.up.delayCount = 0
+    }
+    if (controller.up.delayCount > 0 ){
+      controller.up.delayCount -= 1
+    }
     game.update();
 
   };

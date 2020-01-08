@@ -10,13 +10,13 @@ const Controller = function() {
 
   this.keyDownUp = function(type, key_code) {
 
-    var down = (type == "keydown") ? true : false;
-
+    var isKeydown = (type == "keydown");
+    console.log("keyboard type", type)
     switch(key_code) {
 
-      case 37: this.left.getInput(down);  break;
-      case 38: this.up.getInput(down);    break;
-      case 39: this.right.getInput(down);
+      case 37: this.left.getInput(isKeydown);  break;
+      case 38: this.up.getInput(isKeydown);    break;
+      case 39: this.right.getInput(isKeydown);
 
     }
 
@@ -32,18 +32,31 @@ Controller.prototype = {
 
 Controller.ButtonInput = function() {
 
-  this.active = this.down = false;
+  this.active = false;
+  this.down = false;
+  this.delayCount = 0;
+  this.inAutoShift = false;
+  // this.inInterval = false;
 
 };
 
 Controller.ButtonInput.prototype = {
 
-  constructor : Controller.ButtonInput,
+  constructor: Controller.ButtonInput,
+  
+  getInput: function(isKeydown) {
+    // if (isKeydown && !this.down) {
+    //   this.delayCount = 30
+    //   this.active = isKeydown;
+    // } else if (!isKeydown) {
+    //   this.active = isKeydown;
+    // } else {
+    //   this.delayCount = 5
+    // }
 
-  getInput : function(down) {
-
-    if (this.down != down) this.active = down;
-    this.down = down;
+    if (this.down != isKeydown) this.active = isKeydown;
+    console.log("this.active", this.active)
+    this.down = isKeydown;
 
   }
 

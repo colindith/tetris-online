@@ -29,9 +29,14 @@ const Game = function() {
     ],
 
     settings: {
-      initPos: [4, 2],
-      delayedAutoShift: 5,
-      lockDelay: 10
+      initPos: [3, 2],
+      autoDropInterval: 7,
+      // delayedAutoShift: 30,
+      autoRepeatDelay: 15,
+      autoRepeatInterval: 5,
+      lockDelay: 10,
+      blockFieldWidth: 10,
+      blockFieldHeight: 22,
   
     },
     
@@ -48,6 +53,11 @@ const Game = function() {
     width:128,
 
     delayedCount: 0,
+    
+    autoShiftDelayCount: 0,
+    autoShiftIntervalCount: 0,
+    rotateIntervalCount: 0,
+    softDropIntervalCount: 0,
 
     currentTetromino: null,    // This value would be null when in spawn delay
 
@@ -62,56 +72,92 @@ const Game = function() {
 
     ///////////////// KEYBOARD EVENTS ////////////////////
     /* TODO: Check if move thes event handlers to a single sub class */
-    pressLeft:function(){
-
+    controlLeft: function(){
+      // TODO: Here should get the real left/right edge
+      if (this.currentTetromino.leftmost() == 0) {
+        return
+      }
+      if (this.isCollide(this.currentTetromino, [-1, 0])) {
+        return
+      }
+      this.currentTetromino.pos[0] -= 1
     },
-    pressRight:function(){
-
+    controlRight: function(){
+      if (this.currentTetromino.rightmost() == this.settings.blockFieldWidth-1) {
+        return
+      }
+      if (this.isCollide(this.currentTetromino, [1, 0])) {
+        return
+      }
+      this.currentTetromino.pos[0] += 1
     },
-
+    controlRotateRight: function(){
+      if (this.currentTetromino.rightmost(1) > this.settings.blockFieldWidth) {
+        return
+      };
+      if (this.currentTetromino.leftmost(1) < 0) {
+        return
+      }
+      if (this.isCollide(this.currentTetromino, [0, 0], 1)) {
+        return
+      }
+      this.currentTetromino.rotateRight()
+    },
+    controlRotateLeft: function(){
+      if (this.currentTetromino.rightmost(-1) > this.settings.blockFieldWidth) {
+        return
+      }
+      if (this.currentTetromino.leftmost(-1) < 0) {
+        return
+      }
+      if (this.isCollide(this.currentTetromino, [0, 0], -1)) {
+        return
+      }
+      this.currentTetromino.rotateLeft()
+    },
 
     //////////////// ROUTINE ///////////////////////
-    drop:function(tetromino) {
-      if (this.isCollide(tetromino))  {
+    drop: function(tetromino) {
+      if (this.isCollide(tetromino, [0, 1]))  {
         this.attachTetromino()
       } else {
         tetromino.pos[1] += 1
       }
       
     },
-    isCollide:function(tetromino) {
-      if (tetromino.pos[1] == this.blockStacked.length-1) {
+    isCollide: function(tetromino, move, rotate=0) {
+      if (tetromino.downmost() == this.blockStacked.length-1) {
         return true
       }
 
-      blocks = this.currentTetromino.getBlocks()
+      blocks = this.currentTetromino.getBlocks(rotate)
       // console.log("collide", blocks)
       for (i=0; i<blocks.length; i++) {
-        console.log("blocks[i]", blocks[i][1]+1, blocks[i][0])
-        if (this.blockStacked[blocks[i][1]+1][blocks[i][0]] != 0) {
+        // console.log("blocks[i]", blocks[i][1]+move[1], blocks[i][0]+move[0])
+        if (this.blockStacked[blocks[i][1]+move[1]][blocks[i][0]+move[0]] != 0) {
           return true
         }
         
       }
       return false
     },
-    attachTetromino:function() {
-      console.log("in attach function")
+    attachTetromino: function() {
+      // console.log("in attach function")
       this.stage = 2
       this.delayedCount = 0
 
       blocks = this.currentTetromino.getBlocks()
       for (i=0; i<blocks.length; i++) {
-        console.log("blocks[i]", blocks[i])
+        // console.log("blocks[i]", blocks[i])
         this.blockStacked[blocks[i][1]][blocks[i][0]] = this.currentTetromino.id
       }
 
 
     },
-    initTetromino:function(position) {
+    initTetromino: function(position) {
       currentTetrominoId = this.previewQueue.pop()
       this.currentTetromino = new Game.Tetromino(currentTetrominoId, position)
-      if (this.isCollide(this.currentTetromino)) {
+      if (this.isCollide(this.currentTetromino, [0, 0])) {
         this.stage = 5
         this.delayedCount = 0
       } else {
@@ -120,15 +166,15 @@ const Game = function() {
       }
 
     },
-    update:function() {
+    update: function() {
 
       if (this.stage == 0) {
-        console.log("in stage 00000000 ~~")
+        // console.log("in stage 00000000 ~~")
         this.initTetromino(this.settings.initPos)
       } 
       else if (this.stage == 1){
-        console.log("in stage 11111111 ~~")
-        if (this.delayedCount > this.settings.delayedAutoShift){
+        // console.log("in stage 11111111 ~~")
+        if (this.delayedCount > this.settings.autoDropInterval){
           this.delayedCount = 0
           /* update keyboard event */
         
@@ -150,6 +196,10 @@ const Game = function() {
         console.log("Good Game!")
       }
 
+      if (this.autoShiftDelayCount > 0) {this.autoShiftDelayCount -= 1}
+      if (this.autoShiftIntervalCount > 0) {this.autoShiftIntervalCount -= 1}
+      if (this.rotateIntervalCount > 0) {this.rotateIntervalCount -= 1}
+      if (this.softDropIntervalCount > 0) {this.softDropIntervalCount -= 1}
     }
 
   };
@@ -170,7 +220,7 @@ Game.PreviewQueue = function() {
 	this.pushNewTetrominos = function() {
     // TODO: implement this method
     items.push(1,2,3,4,5,6,7);
-    console.log("push new array")
+    // console.log("push new array")
 	};
 	this.pop = function() {
     if (items.length < 7) {
@@ -183,35 +233,136 @@ Game.PreviewQueue = function() {
   };
 }
 
+// Game.initPosTable = {
+//   1: [[-1,0],[0,0],[1,0],[2,0]],       // I
+//   2: [[0,0],[0,-1],[1,0],[1,-1]],      // O
+//   3: [[-1,0],[0,-1],[0,0],[1,0]],      // T
+//   4: [[-1,0],[0,0],[1,-1],[1,0]],      // J
+//   5: [[-1,-1],[-1,0],[0,0],[1,0]],     // L
+//   6: [[-1,0],[0,-1],[0,0],[1,-1]],     // S
+//   7: [[-1,-1],[0,-1],[0,0],[1,0]]      // Z
+// }
+Game.rotatePositionTable = {
+  1: [                            // I
+    [[0,1],[1,1],[2,1],[3,1]],
+    [[2,0],[2,1],[2,2],[2,3]],
+    [[0,2],[1,2],[2,2],[3,2]],
+    [[1,0],[1,1],[1,2],[1,3]],
+  ],
+  2: [                            // O
+    [[1,0],[1,1],[2,0],[2,1]],
+    [[1,0],[1,1],[2,0],[2,1]],
+    [[1,0],[1,1],[2,0],[2,1]],
+    [[1,0],[1,1],[2,0],[2,1]],
+  ],
+  3: [                            // T
+    [[0,1],[1,0],[1,1],[2,1]],
+    [[1,0],[1,1],[1,2],[2,1]],
+    [[0,1],[1,1],[1,2],[2,1]],
+    [[0,1],[1,0],[1,1],[1,2]],
+  ],
+  4: [                            // J
+    [[0,1],[1,1],[2,0],[2,1]],
+    [[1,0],[1,1],[1,2],[2,2]],
+    [[0,1],[0,2],[1,1],[2,1]],
+    [[0,0],[1,0],[1,1],[1,2]],
+  ],
+  5: [                            // L
+    [[0,0],[0,1],[1,1],[2,1]],
+    [[1,0],[1,1],[1,2],[2,0]],
+    [[0,1],[1,1],[2,1],[2,2]],
+    [[0,2],[1,0],[1,1],[1,2]],
+  ],
+  6: [                            // S
+    [[0,1],[1,0],[1,1],[2,0]],
+    [[1,0],[1,1],[2,1],[2,2]],
+    [[0,2],[1,1],[1,2],[2,1]],
+    [[0,0],[0,1],[1,1],[1,2]],
+  ],
+  7: [                            // Z
+    [[0,0],[1,0],[1,1],[2,1]],
+    [[1,1],[1,2],[2,0],[2,1]],
+    [[0,1],[1,1],[1,2],[2,2]],
+    [[0,1],[0,2],[1,0],[1,1]],
+  ]
+}
+Game.collideEdgeTable = {
+  1: [
+    [1, 1, 0, 3],
+    [0, 3, 2, 2],
+    [2, 2, 0, 3],
+    [0, 3, 1, 1],
+  ],
+  2: [
+    [0, 1, 1, 2],
+    [0, 1, 1, 2],
+    [0, 1, 1, 2],
+    [0, 1, 1, 2],
+  ],
+  3: [
+    [0, 1, 0, 2],
+    [0, 2, 1, 2],
+    [1, 2, 0, 2],
+    [0, 2, 0, 1],
+  ],
+  4: [
+    [0, 1, 0, 2],
+    [0, 2, 1, 2],
+    [1, 2, 0, 2],
+    [0, 2, 0, 1],
+  ],
+  5: [
+    [0, 1, 0, 2],
+    [0, 2, 1, 2],
+    [1, 2, 0, 2],
+    [0, 2, 0, 1],
+  ],
+  6: [
+    [0, 1, 0, 2],
+    [0, 2, 1, 2],
+    [1, 2, 0, 2],
+    [0, 2, 0, 1],
+  ],
+  7: [
+    [0, 1, 0, 2],
+    [0, 2, 1, 2],
+    [1, 2, 0, 2],
+    [0, 2, 0, 1],
+  ],
+}
+Game.kickTable = {
+
+}
+Game.colorTable = {
+  1: "#66ffff",     // I
+  2: "#ffff00",     // O
+  3: "#ff00ff",     // T
+  4: "#ff9900",     // J
+  5: "#0000ff",     // L
+  6: "#ff3300",     // S
+  7: "#66ff33"      // Z
+}
+
+Game.rightmostTable = {
+  1: [-1, 2]
+}
+
+Game.downmost = {
+
+}
+
 Game.Tetromino = function(teriminoId, position){
-  this.initPosTable= {
-    1: [[-1,0],[0,0],[1,0],[2,0]],       // I
-    2: [[0,0],[0,-1],[1,0],[1,-1]],      // O
-    3: [[-1,0],[0,-1],[0,0],[1,0]],      // T
-    4: [[-1,0],[0,0],[1,-1],[1,0]],      // J
-    5: [[-1,-1],[-1,0],[0,0],[1,0]],     // L
-    6: [[-1,0],[0,-1],[0,0],[1,-1]],     // S
-    7: [[-1,-1],[0,-1],[0,0],[1,0]]      // Z
-  }
-
-  this.colorTable = {
-    1: "#66ffff",     // I
-    2: "#ffff00",     // O
-    3: "#ff00ff",     // T
-    4: "#ff9900",     // J
-    5: "#0000ff",     // L
-    6: "#ff3300",     // S
-    7: "#66ff33"      // Z
-  }
-
   this.id = teriminoId
 
-  this.initPos = this.initPosTable[teriminoId]
-  console.log(this.initPos, teriminoId)
-  this.color = this.colorTable[teriminoId]
-  console.log("this.color", this.color)
+  this.rotatePosition = Game.rotatePositionTable[teriminoId]
+  this.collideEdge = Game.collideEdgeTable[teriminoId]
+  // console.log(this.rotatePosition, teriminoId)
+  this.color = Game.colorTable[teriminoId]
+  // console.log("this.color", this.color)
   this.pos = [...position]
   
+  this.direction = 0
+
 }
 
 Game.Tetromino.prototype = {
@@ -238,18 +389,33 @@ Game.Tetromino.prototype = {
   // },
 
   // kickTable: {},
-  getBlocks:function() {
+  getBlocks: function(rotate=0) {
     var res = [];
     pos_x = this.pos[0];
     pos_y = this.pos[1];
     for (i=0; i<4; i++) {
-      relPos = this.initPos[i]
+      relPos = this.rotatePosition[(this.direction+rotate)%4][i]
       
       res.push([pos_x+relPos[0], pos_y+relPos[1]])
     }
     return res;
   },
-  getColor:function() {
+  getColor: function() {
     return  this.color
-  }
+  },
+  downmost: function(rotate=0) {
+    return this.pos[1] + this.collideEdge[(this.direction+rotate)%4][1]
+  },
+  leftmost: function(rotate=0) {
+    return this.pos[0] + this.collideEdge[(this.direction+rotate)%4][2]
+  },
+  rightmost: function(rotate=0) {
+    return this.pos[0] + this.collideEdge[(this.direction+rotate)%4][3]
+  },
+  rotateRight: function() {
+    this.direction = (this.direction+1)%4
+  },
+  rotateLeft: function() {
+    this.direction = (this.direction-1)%4
+  },
 }
