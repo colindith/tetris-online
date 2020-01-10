@@ -131,24 +131,19 @@ const Game = function() {
       }
 
       blocks = this.currentTetromino.getBlocks(rotate)
-      // console.log("collide", blocks)
       for (i=0; i<blocks.length; i++) {
-        // console.log("blocks[i]", blocks[i][1]+move[1], blocks[i][0]+move[0])
         if (this.blockStacked[blocks[i][1]+move[1]][blocks[i][0]+move[0]] != 0) {
           return true
         }
-        
       }
       return false
     },
     attachTetromino: function() {
-      // console.log("in attach function")
       this.stage = 2
       this.delayedCount = 0
 
       blocks = this.currentTetromino.getBlocks()
       for (i=0; i<blocks.length; i++) {
-        // console.log("blocks[i]", blocks[i])
         this.blockStacked[blocks[i][1]][blocks[i][0]] = this.currentTetromino.id
       }
 
@@ -169,11 +164,9 @@ const Game = function() {
     update: function() {
 
       if (this.stage == 0) {
-        // console.log("in stage 00000000 ~~")
         this.initTetromino(this.settings.initPos)
       } 
       else if (this.stage == 1){
-        // console.log("in stage 11111111 ~~")
         if (this.delayedCount > this.settings.autoDropInterval){
           this.delayedCount = 0
           /* update keyboard event */
@@ -220,7 +213,6 @@ Game.PreviewQueue = function() {
 	this.pushNewTetrominos = function() {
     // TODO: implement this method
     items.push(1,2,3,4,5,6,7);
-    // console.log("push new array")
 	};
 	this.pop = function() {
     if (items.length < 7) {
@@ -233,15 +225,6 @@ Game.PreviewQueue = function() {
   };
 }
 
-// Game.initPosTable = {
-//   1: [[-1,0],[0,0],[1,0],[2,0]],       // I
-//   2: [[0,0],[0,-1],[1,0],[1,-1]],      // O
-//   3: [[-1,0],[0,-1],[0,0],[1,0]],      // T
-//   4: [[-1,0],[0,0],[1,-1],[1,0]],      // J
-//   5: [[-1,-1],[-1,0],[0,0],[1,0]],     // L
-//   6: [[-1,0],[0,-1],[0,0],[1,-1]],     // S
-//   7: [[-1,-1],[0,-1],[0,0],[1,0]]      // Z
-// }
 Game.rotatePositionTable = {
   1: [                            // I
     [[0,1],[1,1],[2,1],[3,1]],
@@ -286,6 +269,7 @@ Game.rotatePositionTable = {
     [[0,1],[0,2],[1,0],[1,1]],
   ]
 }
+
 Game.collideEdgeTable = {
   1: [
     [1, 1, 0, 3],
@@ -330,9 +314,11 @@ Game.collideEdgeTable = {
     [0, 2, 0, 1],
   ],
 }
+
 Game.kickTable = {
 
 }
+
 Game.colorTable = {
   1: "#66ffff",     // I
   2: "#ffff00",     // O
@@ -343,22 +329,12 @@ Game.colorTable = {
   7: "#66ff33"      // Z
 }
 
-Game.rightmostTable = {
-  1: [-1, 2]
-}
-
-Game.downmost = {
-
-}
-
 Game.Tetromino = function(teriminoId, position){
   this.id = teriminoId
 
   this.rotatePosition = Game.rotatePositionTable[teriminoId]
   this.collideEdge = Game.collideEdgeTable[teriminoId]
-  // console.log(this.rotatePosition, teriminoId)
   this.color = Game.colorTable[teriminoId]
-  // console.log("this.color", this.color)
   this.pos = [...position]
   
   this.direction = 0
@@ -367,28 +343,6 @@ Game.Tetromino = function(teriminoId, position){
 
 Game.Tetromino.prototype = {
   constructor : Game.Tetromino,
-
-  // initPosTable: {
-  //   0: [[0,0],[0,1],[1,0],[1,1]],     // O
-  //   1: [[4,1],[5,1],[4,2],[5,2]],
-  //   2: [[4,1],[5,1],[4,2],[5,2]],
-  //   3: [[4,1],[5,1],[4,2],[5,2]],
-  //   4: [[4,1],[5,1],[4,2],[5,2]],
-  //   5: [[4,1],[5,1],[4,2],[5,2]],
-  //   6: [[4,1],[5,1],[4,2],[5,2]]
-  // },
-
-  // colorTable: {
-  //   0: "#ffff00",   // O
-  //   1: "#ffff00",
-  //   2: "#ffff00",
-  //   3: "#ffff00",
-  //   4: "#ffff00",
-  //   5: "#ffff00",
-  //   6: "#ffff00"
-  // },
-
-  // kickTable: {},
   getBlocks: function(rotate=0) {
     var res = [];
     pos_x = this.pos[0];

@@ -11,7 +11,6 @@ const Controller = function() {
   this.keyDownUp = function(type, key_code) {
 
     var isKeydown = (type == "keydown");
-    console.log("keyboard type", type)
     switch(key_code) {
 
       case 37: this.left.getInput(isKeydown);  break;
@@ -55,7 +54,6 @@ Controller.ButtonInput.prototype = {
     // }
 
     if (this.down != isKeydown) this.active = isKeydown;
-    console.log("this.active", this.active)
     this.down = isKeydown;
 
   }
