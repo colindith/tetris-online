@@ -42,54 +42,26 @@ window.addEventListener("load", function(event) {
   };
 
   var update = function() {
+    controller.autoRepeat(controller.left,
+                          game.world.controlLeft,
+                          game.world,
+                          game.world.settings.autoRepeatDelay,
+                          game.world.settings.autoRepeatInterval)
+                          
+    controller.autoRepeat(controller.right,
+                          game.world.controlRight,
+                          game.world,
+                          game.world.settings.autoRepeatDelay,
+                          game.world.settings.autoRepeatInterval)
+                          
+    controller.autoRepeat(controller.up,
+                          game.world.controlRotateRight,
+                          game.world,
+                          game.world.settings.autoRepeatInterval,
+                          game.world.settings.autoRepeatInterval)
 
-    if (controller.left.active && (controller.left.delayCount == 0))  {
-      game.world.controlLeft();
-      if (controller.left.inAutoShift){
-        controller.left.delayCount = game.world.settings.autoRepeatInterval
-      } else {
-        controller.left.inAutoShift = true
-        controller.left.delayCount = game.world.settings.autoRepeatDelay
-      }
-    }
-    if (!controller.left.active) {
-      controller.left.delayCount = 0
-      controller.left.inAutoShift = false
-    }
-    if (controller.left.delayCount > 0 ){
-      controller.left.delayCount -= 1
-    }
-    
-    // TODO: This code is extremely ugly, fix it
-    if (controller.right.active && (controller.right.delayCount == 0))  {
-      game.world.controlRight();
-      if (controller.right.inAutoShift){
-        controller.right.delayCount = game.world.settings.autoRepeatInterval
-      } else {
-        controller.right.inAutoShift = true
-        controller.right.delayCount = game.world.settings.autoRepeatDelay
-      }
-    }
-    if (!controller.right.active) {
-      controller.right.delayCount = 0
-      controller.right.inAutoShift = false
-    }
-    if (controller.right.delayCount > 0 ){
-      controller.right.delayCount -= 1
-    }
-    
-    if (controller.up.active && (controller.up.delayCount == 0))  {
-      game.world.controlRotateRight();
-      controller.up.delayCount = game.world.settings.autoRepeatInterval
-    }
-    if (!controller.up.active) {
-      controller.up.delayCount = 0
-    }
-    if (controller.up.delayCount > 0 ){
-      controller.up.delayCount -= 1
-    }
     game.update();
-
+    
   };
 
       /////////////////

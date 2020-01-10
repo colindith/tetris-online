@@ -21,6 +21,25 @@ const Controller = function() {
 
   };
 
+  this.autoRepeat = function(buttonInput, action, world, autoRepeatDelay, autoRepeatInterval) {
+    if (buttonInput.active && (buttonInput.delayCount == 0))  {
+      action.call(world);
+      if (buttonInput.inAutoShift){
+        buttonInput.delayCount = autoRepeatInterval
+      } else {
+        buttonInput.inAutoShift = true
+        buttonInput.delayCount = autoRepeatDelay
+      }
+    }
+    if (!buttonInput.active) {
+      buttonInput.delayCount = 0
+      buttonInput.inAutoShift = false
+    }
+    if (buttonInput.delayCount > 0 ){
+      buttonInput.delayCount -= 1
+    }
+  };
+
 };
 
 Controller.prototype = {
