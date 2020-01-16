@@ -31,10 +31,10 @@ const Game = function() {
     settings: {
       initPos: [3, 2],
       autoDropInterval: 7,
-      // delayedAutoShift: 30,
       autoRepeatDelay: 15,
       autoRepeatInterval: 5,
-      lockDelay: 10,
+      lockDelay: 3,
+      lockTime: 5,
       blockFieldWidth: 10,
       blockFieldHeight: 22,
   
@@ -52,12 +52,13 @@ const Game = function() {
     width:54,
 
     delayedCount: 0,
+    lockDelayCount: 0,
 
     currentTetromino: null,    // This value would be null when in spawn delay
 
     stage: 0,    // 0: for begining & init a new tetromino
                  // 1: normal drop 
-                 // 2: tetromino has attached to the stack, in lock delay
+                 // 2: tetromino has locked to the stack, in lock time
                  // 3: clear delay
                  // 4: spawn delay
                  // Note that for 1,2 currentTetromino should not be null, 
@@ -113,14 +114,16 @@ const Game = function() {
 
     //////////////// ROUTINE ///////////////////////
     drop: function(tetromino) {
+      
       if (this.isCollide(tetromino, [0, 1], 0))  {
-        this.attachTetromino()
+        this.lockDelayCount += 1;
       } else {
-        tetromino.pos[1] += 1
+        tetromino.pos[1] += 1;
+        this.lockDelayCount = 0;
       }
     },
     isCollide: function(tetromino, shift=[0, 0], rotate=0) {
-      if (tetromino.downmost() == this.blockStacked.length-1) {
+      if (tetromino.downmost(rotate, shift) == this.blockStacked.length) {
         return true
       }
 
@@ -136,6 +139,7 @@ const Game = function() {
     attachTetromino: function() {
       this.stage = 2
       this.delayedCount = 0
+      this.lockDelayCount = 0;
 
       blocks = this.currentTetromino.getBlocks()
       for (i=0; i<blocks.length; i++) {
@@ -170,11 +174,14 @@ const Game = function() {
         
           /* update auto drop */
           this.drop(this.currentTetromino)
+          if (this.lockDelayCount >= this.settings.lockDelay) {
+            this.attachTetromino();
+          }
         }
         this.delayedCount++
 
       } else if (this.stage == 2){
-        if (this.delayedCount > this.settings.lockDelay){
+        if (this.delayedCount > this.settings.lockTime){
           this.stage = 0
           this.delayedCount = 0
         } else {
