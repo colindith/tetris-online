@@ -46,18 +46,12 @@ const Game = function() {
     friction:0.9,
     gravity:3,
 
-    // player:new Game.Player(),
     previewQueue:new Game.PreviewQueue(),
 
     height:72,
-    width:128,
+    width:54,
 
     delayedCount: 0,
-    
-    autoShiftDelayCount: 0,
-    autoShiftIntervalCount: 0,
-    rotateIntervalCount: 0,
-    softDropIntervalCount: 0,
 
     currentTetromino: null,    // This value would be null when in spawn delay
 
@@ -92,16 +86,17 @@ const Game = function() {
       this.currentTetromino.pos[0] += 1
     },
     controlRotateRight: function(){
-      if (this.currentTetromino.rightmost(1) > this.settings.blockFieldWidth) {
-        return
-      };
-      if (this.currentTetromino.leftmost(1) < 0) {
-        return
+      kickArray = this.currentTetromino.getKickArray(1)
+      var i = 0;
+      while (i < 5){
+        isCollide = this.isCollide(this.currentTetromino, kickArray[i], 1);
+        if (!isCollide) {
+          this.currentTetromino.rotateRight(kickArray[i]);
+          break;
+        }
+        i++
       }
-      if (this.isCollide(this.currentTetromino, [0, 0], 1)) {
-        return
-      }
-      this.currentTetromino.rotateRight()
+
     },
     controlRotateLeft: function(){
       if (this.currentTetromino.rightmost(-1) > this.settings.blockFieldWidth) {
@@ -110,7 +105,7 @@ const Game = function() {
       if (this.currentTetromino.leftmost(-1) < 0) {
         return
       }
-      if (this.isCollide(this.currentTetromino, [0, 0], -1)) {
+      if (this.isCollide(this.currentTetromino, null, -1)) {
         return
       }
       this.currentTetromino.rotateLeft()
@@ -118,21 +113,21 @@ const Game = function() {
 
     //////////////// ROUTINE ///////////////////////
     drop: function(tetromino) {
-      if (this.isCollide(tetromino, [0, 1]))  {
+      if (this.isCollide(tetromino, [0, 1], 0))  {
         this.attachTetromino()
       } else {
         tetromino.pos[1] += 1
       }
-      
     },
-    isCollide: function(tetromino, move, rotate=0) {
+    isCollide: function(tetromino, shift=[0, 0], rotate=0) {
       if (tetromino.downmost() == this.blockStacked.length-1) {
         return true
       }
 
-      blocks = this.currentTetromino.getBlocks(rotate)
+      blocks = this.currentTetromino.getBlocks(shift, rotate)
+      console.log("blocks", blocks)
       for (i=0; i<blocks.length; i++) {
-        if (this.blockStacked[blocks[i][1]+move[1]][blocks[i][0]+move[0]] != 0) {
+        if (this.blockStacked[blocks[i][1]][blocks[i][0]] != 0) {
           return true
         }
       }
@@ -152,7 +147,7 @@ const Game = function() {
     initTetromino: function(position) {
       currentTetrominoId = this.previewQueue.pop()
       this.currentTetromino = new Game.Tetromino(currentTetrominoId, position)
-      if (this.isCollide(this.currentTetromino, [0, 0])) {
+      if (this.isCollide(this.currentTetromino)) {
         this.stage = 5
         this.delayedCount = 0
       } else {
@@ -188,11 +183,6 @@ const Game = function() {
       } else if (this.stage == 5){
         console.log("Good Game!")
       }
-
-      if (this.autoShiftDelayCount > 0) {this.autoShiftDelayCount -= 1}
-      if (this.autoShiftIntervalCount > 0) {this.autoShiftIntervalCount -= 1}
-      if (this.rotateIntervalCount > 0) {this.rotateIntervalCount -= 1}
-      if (this.softDropIntervalCount > 0) {this.softDropIntervalCount -= 1}
     }
 
   };
@@ -316,7 +306,18 @@ Game.collideEdgeTable = {
 }
 
 Game.kickTable = {
-
+  0: [
+    [[0, 0], [-2, 0], [+1, 0], [-2, -1], [+1, +2]],
+    [[0, 0], [-1, 0], [+2, 0], [-1, +2], [+2, -1]],
+    [[0, 0], [+2, 0], [-1, 0], [+2, +1], [-1, -2]],
+    [[0, 0], [+1, 0], [-2, 0], [+1, -2], [-2, +1]],
+  ],
+  1: [
+    [[0, 0], [-2, 0], [+1, 0], [-2, -1], [+1, +2]],
+    [[0, 0], [-1, 0], [+2, 0], [-1, +2], [+2, -1]],
+    [[0, 0], [+2, 0], [-1, 0], [+2, +1], [-1, -2]],
+    [[0, 0], [+1, 0], [-2, 0], [+1, -2], [-2, +1]],
+  ]
 }
 
 Game.colorTable = {
@@ -335,6 +336,12 @@ Game.Tetromino = function(teriminoId, position){
   this.rotatePosition = Game.rotatePositionTable[teriminoId]
   this.collideEdge = Game.collideEdgeTable[teriminoId]
   this.color = Game.colorTable[teriminoId]
+  if (teriminoId == 0) {
+    this.kick = Game.kickTable[0]
+  } else {
+    this.kick = Game.kickTable[1]
+  }
+  
   this.pos = [...position]
   
   this.direction = 0
@@ -343,12 +350,12 @@ Game.Tetromino = function(teriminoId, position){
 
 Game.Tetromino.prototype = {
   constructor : Game.Tetromino,
-  getBlocks: function(rotate=0) {
+  getBlocks: function(shift=[0, 0], rotate=0) {
     var res = [];
-    pos_x = this.pos[0];
-    pos_y = this.pos[1];
+    pos_x = this.pos[0] + shift[0];
+    pos_y = this.pos[1] + shift[1];
     for (i=0; i<4; i++) {
-      relPos = this.rotatePosition[(this.direction+rotate)%4][i]
+      relPos = this.rotatePosition[(this.direction+rotate+4)%4][i]
       
       res.push([pos_x+relPos[0], pos_y+relPos[1]])
     }
@@ -357,19 +364,31 @@ Game.Tetromino.prototype = {
   getColor: function() {
     return  this.color
   },
-  downmost: function(rotate=0) {
-    return this.pos[1] + this.collideEdge[(this.direction+rotate)%4][1]
+  downmost: function(rotate=0, shift=[0, 0]) {
+    return this.pos[1] + shift[1] + this.collideEdge[(this.direction+rotate+4)%4][1]
   },
-  leftmost: function(rotate=0) {
-    return this.pos[0] + this.collideEdge[(this.direction+rotate)%4][2]
+  leftmost: function(rotate=0, shift=[0, 0]) {
+    return this.pos[0] + shift[0] + this.collideEdge[(this.direction+rotate+4)%4][2]
   },
-  rightmost: function(rotate=0) {
-    return this.pos[0] + this.collideEdge[(this.direction+rotate)%4][3]
+  rightmost: function(rotate=0, shift=[0, 0]) {
+    return this.pos[0] + shift[0] + this.collideEdge[(this.direction+rotate+4)%4][3]
   },
-  rotateRight: function() {
-    this.direction = (this.direction+1)%4
+  rotateRight: function(shift=[0, 0]) {
+    this.direction = (this.direction+5)%4
+    this.pos[0] += shift[0]
+    this.pos[1] += shift[1]
   },
-  rotateLeft: function() {
-    this.direction = (this.direction-1)%4
+  rotateLeft: function(shift=[0, 0]) {
+    this.direction = (this.direction+3)%4
+    this.pos[0] += shift[0]
+    this.pos[1] += shift[1]
   },
+  getKickArray: function(rotate=1) {   // rotate must be 1 or -1
+    kickIndex = (4 + this.direction + ((rotate-1)/2))%4
+    console.log("kickIndex", kickIndex)
+    res = this.kick[kickIndex]
+    res.map(function(x) { return x*rotate; })
+    console.log("res", res)
+    return res
+  }
 }
