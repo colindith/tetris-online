@@ -4,39 +4,40 @@ const Game = function() {
   this.world = {
 
     blockStacked: [
-      [0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0],
-      [0,0,0,0,0,0,0,0,0,0]
+      [9,0,0,0,0,0,0,0,0,0,0,9],
+      [9,0,0,0,0,0,0,0,0,0,0,9],
+      [9,0,0,0,0,0,0,0,0,0,0,9],
+      [9,0,0,0,0,0,0,0,0,0,0,9],
+      [9,0,0,0,0,0,0,0,0,0,0,9],
+      [9,0,0,0,0,0,0,0,0,0,0,9],
+      [9,0,0,0,0,0,0,0,0,0,0,9],
+      [9,0,0,0,0,0,0,0,0,0,0,9],
+      [9,0,0,0,0,0,0,0,0,0,0,9],
+      [9,0,0,0,0,0,0,0,0,0,0,9],
+      [9,0,0,0,0,0,0,0,0,0,0,9],
+      [9,0,0,0,0,0,0,0,0,0,0,9],
+      [9,0,0,0,0,0,0,0,0,0,0,9],
+      [9,0,0,0,0,0,0,0,0,0,0,9],
+      [9,0,0,0,0,0,0,0,0,0,0,9],
+      [9,0,0,0,0,0,0,0,0,0,0,9],
+      [9,0,0,0,0,0,0,0,0,0,0,9],
+      [9,0,0,0,0,0,0,0,0,0,0,9],
+      [9,0,0,0,0,0,0,0,0,0,0,9],
+      [9,0,0,0,0,0,0,0,0,0,0,9],
+      [9,0,0,0,0,0,0,0,0,0,0,9],
+      [9,0,0,0,0,0,0,0,0,0,0,9],
+      [9,9,9,9,9,9,9,9,9,9,9,9]
     ],
 
     settings: {
-      initPos: [3, 2],
+      initPos: [4, 2],
       autoDropInterval: 7,
       autoRepeatDelay: 15,
       autoRepeatInterval: 5,
       lockDelay: 3,
       lockTime: 5,
-      blockFieldWidth: 10,
-      blockFieldHeight: 22,
+      blockFieldWidth: 12,
+      blockFieldHeight: 23,
   
     },
     
@@ -68,19 +69,12 @@ const Game = function() {
     ///////////////// KEYBOARD EVENTS ////////////////////
     /* TODO: Check if move thes event handlers to a single sub class */
     controlLeft: function(){
-      // TODO: Here should get the real left/right edge
-      if (this.currentTetromino.leftmost() == 0) {
-        return
-      }
       if (this.isCollide(this.currentTetromino, [-1, 0])) {
         return
       }
       this.currentTetromino.pos[0] -= 1
     },
     controlRight: function(){
-      if (this.currentTetromino.rightmost() == this.settings.blockFieldWidth-1) {
-        return
-      }
       if (this.isCollide(this.currentTetromino, [1, 0])) {
         return
       }
@@ -100,16 +94,16 @@ const Game = function() {
 
     },
     controlRotateLeft: function(){
-      if (this.currentTetromino.rightmost(-1) > this.settings.blockFieldWidth) {
-        return
+      kickArray = this.currentTetromino.getKickArray(-1)
+      var i = 0;
+      while (i < 5){
+        isCollide = this.isCollide(this.currentTetromino, kickArray[i], -1);
+        if (!isCollide) {
+          this.currentTetromino.rotateRight(kickArray[i]);
+          break;
+        }
+        i++
       }
-      if (this.currentTetromino.leftmost(-1) < 0) {
-        return
-      }
-      if (this.isCollide(this.currentTetromino, null, -1)) {
-        return
-      }
-      this.currentTetromino.rotateLeft()
     },
 
     //////////////// ROUTINE ///////////////////////
@@ -123,12 +117,7 @@ const Game = function() {
       }
     },
     isCollide: function(tetromino, shift=[0, 0], rotate=0) {
-      if (tetromino.downmost(rotate, shift) == this.blockStacked.length) {
-        return true
-      }
-
       blocks = this.currentTetromino.getBlocks(shift, rotate)
-      console.log("blocks", blocks)
       for (i=0; i<blocks.length; i++) {
         if (this.blockStacked[blocks[i][1]][blocks[i][0]] != 0) {
           return true
@@ -141,12 +130,47 @@ const Game = function() {
       this.delayedCount = 0
       this.lockDelayCount = 0;
 
-      blocks = this.currentTetromino.getBlocks()
-      for (i=0; i<blocks.length; i++) {
+      blocks = this.currentTetromino.getBlocks();
+      height1 = this.settings.blockFieldHeight;
+      height2 = 0;
+      for (var i=0; i<blocks.length; i++) {
+        if (blocks[i][1] < height1) {
+          height1 = blocks[i][1];
+        } else if (blocks[i][1] > height2) {
+          height2 = blocks[i][1];
+        }
         this.blockStacked[blocks[i][1]][blocks[i][0]] = this.currentTetromino.id
       }
-
-
+      this.checkClear(height1, height2);
+    },
+    checkClear: function(height1, height2) {      // height2 should greater than height1
+      var clearLineArray = [];
+      for (var i=height1; i<=height2; i++) {
+        var isClear = true;
+        for (var j = 0; j<this.settings.blockFieldWidth; j++) {
+          if (this.blockStacked[i][j] == 0) {
+            isClear = false;
+            break;
+          } 
+        }
+        if (isClear) {
+          clearLineArray.push(i);
+        }
+      }
+      if (clearLineArray.length) {
+        this.clearLine(clearLineArray);
+      }
+    },
+    clearLine: function(clearLineArray) {
+      newLineShift = 0;
+      for (var i=this.settings.blockFieldHeight; i>4; i--){
+        var j = i;
+        while (j == clearLineArray[clearLineArray.length - newLineShift - 1]){
+          newLineShift++;
+          j--;
+        }
+        this.blockStacked[i] = this.blockStacked[i-newLineShift];
+      } 
     },
     initTetromino: function(position) {
       currentTetrominoId = this.previewQueue.pop()
@@ -193,6 +217,8 @@ const Game = function() {
     }
 
   };
+
+  
 
   this.update = function() {
 
@@ -392,10 +418,8 @@ Game.Tetromino.prototype = {
   },
   getKickArray: function(rotate=1) {   // rotate must be 1 or -1
     kickIndex = (4 + this.direction + ((rotate-1)/2))%4
-    console.log("kickIndex", kickIndex)
     res = this.kick[kickIndex]
     res.map(function(x) { return x*rotate; })
-    console.log("res", res)
     return res
   }
 }

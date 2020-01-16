@@ -1,6 +1,7 @@
 
 const Display = function(canvas) {
   this.colorTable = {
+    9: "#ffffff",     // edge
     1: "#66ffff",     // I
     2: "#ffff00",     // O
     3: "#ff00ff",     // T
@@ -16,10 +17,8 @@ const Display = function(canvas) {
   this.drawBlock = function(blockStacked, color) {
     width = 1
     height = 1
-    
-    // console.log("blockStacked", blockStacked)
-    for (i = 0; i<22; i++) {
-      for (j = 0; j<10; j++) {
+    for (i = 4; i<23; i++) {
+      for (j = 0; j<12; j++) {
         if (blockStacked[i][j] == 0) {
           this.buffer.fillStyle = color;
           
