@@ -32,16 +32,16 @@ const Game = function() {
     settings: {
       initPos: [4, 2],
       autoDropInterval: 7,
-      autoRepeatDelay: 15,
-      autoRepeatInterval: 5,
+      autoRepeatDelay: 6,
+      autoRepeatInterval: 1,
       rotateAutoRepeatDelay: 6,
       rotateAutoRepeatInterval: 6,
-      softDropAutoRepeatDelay: 5,
-      softDropAutoRepeatInterval: 5,
+      softDropAutoRepeatDelay: 1,
+      softDropAutoRepeatInterval: 1,
       hardDropAutoRepeatDelay: 6,
       hardDropAutoRepeatInterval: 6,
-      lockDelay: 5,
-      hardLockDelay: 10,
+      lockDelay: 4,
+      hardLockDelay: 20,
       lockTime: 5,
       blockFieldWidth: 12,
       blockFieldHeight: 23,
@@ -89,7 +89,7 @@ const Game = function() {
       }
       this.currentTetromino.pos[0] -= 1
       if (this.lockDelayCount -= 0) {
-        this.lockDelayCount +=  this.settings.lockDelay;
+        this.lockDelayCount =  0;
       }
     },
     controlRight: function(){
@@ -98,8 +98,8 @@ const Game = function() {
         return;
       }
       this.currentTetromino.pos[0] += 1
-      if (this.lockDelayCount -= 0) {
-        this.lockDelayCount +=  this.settings.lockDelay;
+      if (this.lockDelayCount != 0) {
+        this.lockDelayCount = 0;
       }
     },
     controlRotateRight: function(){
@@ -111,7 +111,7 @@ const Game = function() {
         if (!isCollide) {
           this.currentTetromino.rotateRight(kickArray[i]);
           if (this.lockDelayCount != 0) {
-            this.lockDelayCount -=  this.settings.lockDelay;
+            this.lockDelayCount =  0;
           }
           return;
         }
@@ -126,9 +126,9 @@ const Game = function() {
       while (i < 5){
         isCollide = this.isCollide(this.currentTetromino, kickArray[i], -1);
         if (!isCollide) {
-          this.currentTetromino.rotateRight(kickArray[i]);
+          this.currentTetromino.rotateLeft(kickArray[i]);
           if (this.lockDelayCount != 0) {
-            this.lockDelayCount -=  this.settings.lockDelay;
+            this.lockDelayCount =  0;
           }
           return;
         }
@@ -394,17 +394,30 @@ Game.collideEdgeTable = {
 }
 
 Game.kickTable = {
-  0: [
-    [[0, 0], [-2, 0], [+1, 0], [-2, -1], [+1, +2]],
-    [[0, 0], [-1, 0], [+2, 0], [-1, +2], [+2, -1]],
-    [[0, 0], [+2, 0], [-1, 0], [+2, +1], [-1, -2]],
-    [[0, 0], [+1, 0], [-2, 0], [+1, -2], [-2, +1]],
-  ],
+  // 1: [
+  //   [[0, 0], [-2, 0], [+1, 0], [-2, -1], [+1, +2]],
+  //   [[0, 0], [-1, 0], [+2, 0], [-1, +2], [+2, -1]],
+  //   [[0, 0], [+2, 0], [-1, 0], [+2, +1], [-1, -2]],
+  //   [[0, 0], [+1, 0], [-2, 0], [+1, -2], [-2, +1]],
+  // ],
+  // 2: [
+  //   [[0, 0], [-1, 0], [-1, +1], [0, -2], [-1, -2]],
+  //   [[0, 0], [+1, 0], [+1, -1], [0, +2], [+1, +2]],
+  //   [[0, 0], [+1, 0], [+1, +1], [0, -2], [+1, -2]],
+  //   [[0, 0], [-1, 0], [-1, -1], [0, +2], [-1, +2]],
+  // ]
+  // Since we use reversed y corrdinate, we multiply the y axis with -1
   1: [
-    [[0, 0], [-2, 0], [+1, 0], [-2, -1], [+1, +2]],
-    [[0, 0], [-1, 0], [+2, 0], [-1, +2], [+2, -1]],
-    [[0, 0], [+2, 0], [-1, 0], [+2, +1], [-1, -2]],
-    [[0, 0], [+1, 0], [-2, 0], [+1, -2], [-2, +1]],
+    [[0, 0], [-2, 0], [+1, 0], [-2, +1], [+1, -2]],
+    [[0, 0], [-1, 0], [+2, 0], [-1, -2], [+2, +1]],
+    [[0, 0], [+2, 0], [-1, 0], [+2, -1], [-1, +2]],
+    [[0, 0], [+1, 0], [-2, 0], [+1, +2], [-2, -1]],
+  ],
+  2: [
+    [[0, 0], [-1, 0], [-1, -1], [0, +2], [-1, +2]],
+    [[0, 0], [+1, 0], [+1, +1], [0, -2], [+1, -2]],
+    [[0, 0], [+1, 0], [+1, -1], [0, +2], [+1, +2]],
+    [[0, 0], [-1, 0], [-1, +1], [0, -2], [-1, -2]],
   ]
 }
 
@@ -424,10 +437,10 @@ Game.Tetromino = function(teriminoId, position){
   this.rotatePosition = Game.rotatePositionTable[teriminoId]
   this.collideEdge = Game.collideEdgeTable[teriminoId]
   this.color = Game.colorTable[teriminoId]
-  if (teriminoId == 0) {
-    this.kick = Game.kickTable[0]
-  } else {
+  if (teriminoId == 1) {
     this.kick = Game.kickTable[1]
+  } else {
+    this.kick = Game.kickTable[2]
   }
   
   this.pos = [...position]

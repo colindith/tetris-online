@@ -60,6 +60,12 @@ window.addEventListener("load", function(event) {
                           game.world,
                           game.world.settings.rotateAutoRepeatDelay,
                           game.world.settings.rotateAutoRepeatInterval)
+
+    controller.autoRepeat(controller.z,
+                          game.world.controlRotateLeft,
+                          game.world,
+                          game.world.settings.rotateAutoRepeatDelay,
+                          game.world.settings.rotateAutoRepeatInterval)
     
     controller.autoRepeat(controller.down,
                           game.world.controlSoftDrop,
