@@ -15,11 +15,15 @@ const Display = function(canvas) {
   this.context = canvas.getContext("2d");
 
   this.drawBlock = function(blockStacked, color) {
-    width = 1
-    height = 1
+    blockSpacing = 3
+    
+    width = 2
+    height = 2
 
-    previewWidth = 0.5
-    previewHeight = 0.5
+    previewSpacing = 2
+
+    previewWidth = 2
+    previewHeight = 2
 
     for (i = 4; i<23; i++) {
       for (j = 0; j<12; j++) {
@@ -30,7 +34,7 @@ const Display = function(canvas) {
           this.buffer.fillStyle = this.colorTable[blockStacked[i][j]];
         }
         
-        this.buffer.fillRect(Math.floor(20+j*2), Math.floor(10+i*2), width, height);
+        this.buffer.fillRect(Math.floor(30+j*blockSpacing), Math.floor(-1+i*blockSpacing), width, height);
       }
     }
     
@@ -38,19 +42,19 @@ const Display = function(canvas) {
   this.drawCurrentTetromino = function(positions, color) {
     for (i=0; i<positions.length; i++){
       this.buffer.fillStyle = color;
-      this.buffer.fillRect(Math.floor(20+positions[i][0]*2), Math.floor(10+positions[i][1]*2), width, height);
+      this.buffer.fillRect(Math.floor(30+positions[i][0]*blockSpacing), Math.floor(-1+positions[i][1]*blockSpacing), width, height);
     }
   };
   this.drawPreview = function(sequence, blocks, color) {
     for (i=0; i<blocks.length; i++){
       this.buffer.fillStyle = color;
-      this.buffer.fillRect(Math.floor(50+blocks[i][0]*1.2), Math.floor(18+blocks[i][1]*1.2) + sequence * 8, previewWidth, previewHeight);
+      this.buffer.fillRect(Math.floor(70+blocks[i][0]*previewSpacing), Math.floor(14+blocks[i][1]*previewSpacing) + sequence * 8, previewWidth, previewHeight);
     }
   };
   this.drawHold = function(blocks, color) {
     for (i=0; i<blocks.length; i++){
       this.buffer.fillStyle = color;
-      this.buffer.fillRect(Math.floor(10+blocks[i][0]*2), Math.floor(18+blocks[i][1]*2), width, height);
+      this.buffer.fillRect(Math.floor(14+blocks[i][0]*blockSpacing), Math.floor(14+blocks[i][1]*blockSpacing), width, height);
     }
   };
 

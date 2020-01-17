@@ -34,13 +34,13 @@ const Game = function() {
       autoDropInterval: 7,
       autoRepeatDelay: 6,
       autoRepeatInterval: 1,
-      rotateAutoRepeatDelay: 6,
-      rotateAutoRepeatInterval: 6,
+      rotateAutoRepeatDelay: 8,
+      rotateAutoRepeatInterval: 8,
       softDropAutoRepeatDelay: 1,
       softDropAutoRepeatInterval: 1,
-      hardDropAutoRepeatDelay: 6,
-      hardDropAutoRepeatInterval: 6,
-      lockDelay: 4,
+      hardDropAutoRepeatDelay: 8  ,
+      hardDropAutoRepeatInterval: 8,
+      lockDelay: 6,
       hardLockDelay: 20,
       lockTime: 5,
       blockFieldWidth: 12,
@@ -79,8 +79,8 @@ const Game = function() {
                  // the stage idea is not good
 
 
-
-
+    ////////////////// Initialize /////////////////////
+    // blockStacked
 
 
     ///////////////// KEYBOARD EVENTS ////////////////////
