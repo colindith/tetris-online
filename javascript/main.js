@@ -67,6 +67,12 @@ window.addEventListener("load", function(event) {
                           game.world.settings.softDropAutoRepeatDelay,
                           game.world.settings.softDropAutoRepeatInterval)
 
+    controller.autoRepeat(controller.space,
+                          game.world.controlHardDrop,
+                          game.world,
+                          game.world.settings.hardDropAutoRepeatDelay,
+                          game.world.settings.hardDropAutoRepeatInterval)
+
     game.update();
     
   };

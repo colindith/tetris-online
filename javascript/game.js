@@ -38,8 +38,10 @@ const Game = function() {
       rotateAutoRepeatInterval: 6,
       softDropAutoRepeatDelay: 5,
       softDropAutoRepeatInterval: 5,
+      hardDropAutoRepeatDelay: 6,
       hardDropAutoRepeatInterval: 6,
-      lockDelay: 3,
+      lockDelay: 5,
+      hardLockDelay: 10,
       lockTime: 5,
       blockFieldWidth: 12,
       blockFieldHeight: 23,
@@ -60,6 +62,7 @@ const Game = function() {
 
     delayedCount: 0,
     lockDelayCount: 0,
+    hardLockDelayCount: 0,
 
     currentTetromino: null,    // This value would be null when in spawn delay
 
@@ -76,7 +79,7 @@ const Game = function() {
 
 
 
-                 
+
     ///////////////// KEYBOARD EVENTS ////////////////////
     /* TODO: Check if move thes event handlers to a single sub class */
     controlLeft: function(){
@@ -85,6 +88,9 @@ const Game = function() {
         return;
       }
       this.currentTetromino.pos[0] -= 1
+      if (this.lockDelayCount -= 0) {
+        this.lockDelayCount +=  this.settings.lockDelay;
+      }
     },
     controlRight: function(){
       if (this.currentTetromino == null) return;
@@ -92,6 +98,9 @@ const Game = function() {
         return;
       }
       this.currentTetromino.pos[0] += 1
+      if (this.lockDelayCount -= 0) {
+        this.lockDelayCount +=  this.settings.lockDelay;
+      }
     },
     controlRotateRight: function(){
       if (this.currentTetromino == null) return;
@@ -101,7 +110,10 @@ const Game = function() {
         isCollide = this.isCollide(this.currentTetromino, kickArray[i], 1);
         if (!isCollide) {
           this.currentTetromino.rotateRight(kickArray[i]);
-          break;
+          if (this.lockDelayCount != 0) {
+            this.lockDelayCount -=  this.settings.lockDelay;
+          }
+          return;
         }
         i++
       }
@@ -115,7 +127,10 @@ const Game = function() {
         isCollide = this.isCollide(this.currentTetromino, kickArray[i], -1);
         if (!isCollide) {
           this.currentTetromino.rotateRight(kickArray[i]);
-          break;
+          if (this.lockDelayCount != 0) {
+            this.lockDelayCount -=  this.settings.lockDelay;
+          }
+          return;
         }
         i++
       }
@@ -126,7 +141,8 @@ const Game = function() {
     },
     controlHardDrop: function(){
       if (this.currentTetromino == null) return;
-      this.drop(this.currentTetromino);
+      this.currentTetromino.pos[1] += this.getHardDropShift();
+      this.attachTetromino();
     },
     
 
@@ -135,9 +151,11 @@ const Game = function() {
       
       if (this.isCollide(tetromino, [0, 1], 0))  {
         this.lockDelayCount += 1;
+        this.hardLockDelayCount += 1;
       } else {
         tetromino.pos[1] += 1;
         this.lockDelayCount = 0;
+        this.hardLockDelayCount = 0;
       }
     },
     isCollide: function(tetromino, shift=[0, 0], rotate=0) {
@@ -223,7 +241,7 @@ const Game = function() {
         
           /* update auto drop */
           this.drop(this.currentTetromino)
-          if (this.lockDelayCount >= this.settings.lockDelay) {
+          if (this.lockDelayCount >= this.settings.lockDelay || this.hardLockDelayCount >= this.settings.hardLockDelay) {
             this.attachTetromino();
           }
         }
@@ -244,12 +262,10 @@ const Game = function() {
 
     ////////////// ghost piece //////////////
     getHardDropShift: function() {
-      downShift = -2;
-      for (var y=this.currentTetromino.pos[1]-1; y<this.settings.blockFieldHeight; y++) {
+      for (var downShift=1; downShift<this.settings.blockFieldHeight; downShift++) {
         if (this.isCollide(this.currentTetromino, [0, downShift])) {
           return downShift-1;
         }
-        downShift++;
       }
       console.error("No buttom for harddrop");
       return null;
@@ -274,7 +290,7 @@ Game.PreviewQueue = function() {
 	var items = [];
 	this.pushNewTetrominos = function() {
     // TODO: implement this method
-    items.push(1,2,3,4,5,6,7);
+    items.push(1,2,4,5,6,7,3);
 	};
 	this.pop = function() {
     if (items.length < 7) {
@@ -435,6 +451,9 @@ Game.Tetromino.prototype = {
   },
   getColor: function() {
     return  this.color
+  },
+  uppermostShift: function() {
+    return 2 - this.collideEdge[this.direction%4][0]
   },
   uppermost: function(rotate=0, shift=[0, 0]) {
     return this.pos[1] + shift[1] + this.collideEdge[(this.direction+rotate+4)%4][0]

@@ -8,6 +8,7 @@ const Controller = function() {
   this.right = new Controller.ButtonInput();
   this.up    = new Controller.ButtonInput();
   this.down  = new Controller.ButtonInput();
+  this.space = new Controller.ButtonInput();
 
   this.keyDownUp = function(type, key_code) {
 
@@ -18,6 +19,7 @@ const Controller = function() {
       case 38: this.up.getInput(isKeydown);     break;
       case 39: this.right.getInput(isKeydown);  break;
       case 40: this.down.getInput(isKeydown);   break;
+      case 32: this.space.getInput(isKeydown);
 
     }
 
