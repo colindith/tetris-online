@@ -83,7 +83,7 @@ const Game = function() {
     ///////////////// KEYBOARD EVENTS ////////////////////
     /* TODO: Check if move thes event handlers to a single sub class */
     controlLeft: function(){
-      if (this.currentTetromino == null) return;
+      if (this.stage != 1) return;
       if (this.isCollide(this.currentTetromino, [-1, 0])) {
         return;
       }
@@ -93,7 +93,7 @@ const Game = function() {
       }
     },
     controlRight: function(){
-      if (this.currentTetromino == null) return;
+      if (this.stage != 1) return;
       if (this.isCollide(this.currentTetromino, [1, 0])) {
         return;
       }
@@ -103,7 +103,7 @@ const Game = function() {
       }
     },
     controlRotateRight: function(){
-      if (this.currentTetromino == null) return;
+      if (this.stage != 1) return;
       kickArray = this.currentTetromino.getKickArray(1)
       var i = 0;
       while (i < 5){
@@ -120,7 +120,7 @@ const Game = function() {
 
     },
     controlRotateLeft: function(){
-      if (this.currentTetromino == null) return;
+      if (this.stage != 1) return;
       kickArray = this.currentTetromino.getKickArray(-1)
       var i = 0;
       while (i < 5){
@@ -128,7 +128,7 @@ const Game = function() {
         if (!isCollide) {
           this.currentTetromino.rotateLeft(kickArray[i]);
           if (this.lockDelayCount != 0) {
-            this.lockDelayCount =  0;
+            this.lockDelayCount = 0;
           }
           return;
         }
@@ -136,11 +136,11 @@ const Game = function() {
       }
     },
     controlSoftDrop: function(){
-      if (this.currentTetromino == null) return;
+      if (this.stage != 1) return;
       this.drop(this.currentTetromino);
     },
     controlHardDrop: function(){
-      if (this.currentTetromino == null) return;
+      if (this.stage != 1) return;
       this.currentTetromino.pos[1] += this.getHardDropShift();
       this.attachTetromino();
     },
