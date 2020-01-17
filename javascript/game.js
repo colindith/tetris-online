@@ -34,11 +34,17 @@ const Game = function() {
       autoDropInterval: 7,
       autoRepeatDelay: 15,
       autoRepeatInterval: 5,
+      rotateAutoRepeatDelay: 6,
+      rotateAutoRepeatInterval: 6,
+      softDropAutoRepeatDelay: 5,
+      softDropAutoRepeatInterval: 5,
+      hardDropAutoRepeatInterval: 6,
       lockDelay: 3,
       lockTime: 5,
       blockFieldWidth: 12,
       blockFieldHeight: 23,
-  
+      
+      ghostColor: "#7F8C8D",
     },
     
 
@@ -66,21 +72,29 @@ const Game = function() {
                  // thus the tetromino can be control by key board
                  // the stage idea is not good
 
+
+
+
+
+                 
     ///////////////// KEYBOARD EVENTS ////////////////////
     /* TODO: Check if move thes event handlers to a single sub class */
     controlLeft: function(){
+      if (this.currentTetromino == null) return;
       if (this.isCollide(this.currentTetromino, [-1, 0])) {
-        return
+        return;
       }
       this.currentTetromino.pos[0] -= 1
     },
     controlRight: function(){
+      if (this.currentTetromino == null) return;
       if (this.isCollide(this.currentTetromino, [1, 0])) {
-        return
+        return;
       }
       this.currentTetromino.pos[0] += 1
     },
     controlRotateRight: function(){
+      if (this.currentTetromino == null) return;
       kickArray = this.currentTetromino.getKickArray(1)
       var i = 0;
       while (i < 5){
@@ -94,6 +108,7 @@ const Game = function() {
 
     },
     controlRotateLeft: function(){
+      if (this.currentTetromino == null) return;
       kickArray = this.currentTetromino.getKickArray(-1)
       var i = 0;
       while (i < 5){
@@ -105,6 +120,15 @@ const Game = function() {
         i++
       }
     },
+    controlSoftDrop: function(){
+      if (this.currentTetromino == null) return;
+      this.drop(this.currentTetromino);
+    },
+    controlHardDrop: function(){
+      if (this.currentTetromino == null) return;
+      this.drop(this.currentTetromino);
+    },
+    
 
     //////////////// ROUTINE ///////////////////////
     drop: function(tetromino) {
@@ -118,7 +142,7 @@ const Game = function() {
     },
     isCollide: function(tetromino, shift=[0, 0], rotate=0) {
       blocks = this.currentTetromino.getBlocks(shift, rotate)
-      for (i=0; i<blocks.length; i++) {
+      for (var i=0; i<blocks.length; i++) {
         if (this.blockStacked[blocks[i][1]][blocks[i][0]] != 0) {
           return true
         }
@@ -141,6 +165,7 @@ const Game = function() {
         }
         this.blockStacked[blocks[i][1]][blocks[i][0]] = this.currentTetromino.id
       }
+      this.currentTetromino = null;
       this.checkClear(height1, height2);
     },
     checkClear: function(height1, height2) {      // height2 should greater than height1
@@ -214,16 +239,30 @@ const Game = function() {
       } else if (this.stage == 5){
         console.log("Good Game!")
       }
-    }
+    },
 
+
+    ////////////// ghost piece //////////////
+    getHardDropShift: function() {
+      downShift = -2;
+      for (var y=this.currentTetromino.pos[1]-1; y<this.settings.blockFieldHeight; y++) {
+        if (this.isCollide(this.currentTetromino, [0, downShift])) {
+          return downShift-1;
+        }
+        downShift++;
+      }
+      console.error("No buttom for harddrop");
+      return null;
+    },
+    getHardDropBlocks: function() {
+      return this.currentTetromino.getBlocks([0, this.getHardDropShift()]);
+    }
   };
 
   
 
   this.update = function() {
-
     this.world.update();
-      
   };
 
 };
@@ -396,6 +435,9 @@ Game.Tetromino.prototype = {
   },
   getColor: function() {
     return  this.color
+  },
+  uppermost: function(rotate=0, shift=[0, 0]) {
+    return this.pos[1] + shift[1] + this.collideEdge[(this.direction+rotate+4)%4][0]
   },
   downmost: function(rotate=0, shift=[0, 0]) {
     return this.pos[1] + shift[1] + this.collideEdge[(this.direction+rotate+4)%4][1]

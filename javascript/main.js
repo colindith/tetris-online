@@ -35,6 +35,7 @@ window.addEventListener("load", function(event) {
     // display.drawRectangle(game.world.player.x, game.world.player.y, game.world.player.width, game.world.player.height, game.world.player.color);
     display.drawBlock(game.world.blockStacked, "#000000");
     if (game.world.currentTetromino != null) {
+      display.drawCurrentTetromino(game.world.getHardDropBlocks(), game.world.settings.ghostColor);
       display.drawCurrentTetromino(game.world.currentTetromino.getBlocks(), game.world.currentTetromino.getColor());
     }
     display.render();
@@ -57,8 +58,14 @@ window.addEventListener("load", function(event) {
     controller.autoRepeat(controller.up,
                           game.world.controlRotateRight,
                           game.world,
-                          game.world.settings.autoRepeatInterval,
-                          game.world.settings.autoRepeatInterval)
+                          game.world.settings.rotateAutoRepeatDelay,
+                          game.world.settings.rotateAutoRepeatInterval)
+    
+    controller.autoRepeat(controller.down,
+                          game.world.controlSoftDrop,
+                          game.world,
+                          game.world.settings.softDropAutoRepeatDelay,
+                          game.world.settings.softDropAutoRepeatInterval)
 
     game.update();
     
