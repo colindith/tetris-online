@@ -17,6 +17,10 @@ const Display = function(canvas) {
   this.drawBlock = function(blockStacked, color) {
     width = 1
     height = 1
+
+    previewWidth = 0.5
+    previewHeight = 0.5
+
     for (i = 4; i<23; i++) {
       for (j = 0; j<12; j++) {
         if (blockStacked[i][j] == 0) {
@@ -36,8 +40,12 @@ const Display = function(canvas) {
       this.buffer.fillStyle = color;
       this.buffer.fillRect(Math.floor(20+positions[i][0]*2), Math.floor(10+positions[i][1]*2), width, height);
     }
-
-
+  };
+  this.drawPreview = function(sequence, blocks, color) {
+    for (i=0; i<blocks.length; i++){
+      this.buffer.fillStyle = color;
+      this.buffer.fillRect(Math.floor(50+blocks[i][0]*1.2), Math.floor(18+blocks[i][1]*1.2) + sequence * 8, previewWidth, previewHeight);
+    }
   };
 
   this.drawRectangle = function(x, y, width, height, color) {

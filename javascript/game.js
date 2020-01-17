@@ -58,7 +58,7 @@ const Game = function() {
     previewQueue:new Game.PreviewQueue(),
 
     height:72,
-    width:54,
+    width:108,
 
     delayedCount: 0,
     lockDelayCount: 0,
@@ -230,6 +230,7 @@ const Game = function() {
     update: function() {
 
       if (this.stage == 0) {
+        this.previewQueue.pushNewTetrominos();
         this.initTetromino(this.settings.initPos)
       } 
       else if (this.stage == 1){
@@ -287,7 +288,7 @@ Game.prototype = { constructor : Game };
 
 
 Game.PreviewQueue = function() {
-	var items = [];
+  var items = [];
 	this.pushNewTetrominos = function() {
     // TODO: implement this method
     items.push(1,2,4,5,6,7,3);
@@ -298,8 +299,18 @@ Game.PreviewQueue = function() {
     }
     return items.shift();
   };
-  this.preview = function() {
-    return items
+  this.previewDisplay = function() {
+    if (items.length == 0) {
+      return [];
+    }
+    res = [];
+    for (var i=0; i<5; i++) {
+      res.push({
+        "blocks": Game.rotatePositionTable[items[i]][0],
+        "color": Game.colorTable[items[i]]
+      })
+    }
+    return res;
   };
 }
 

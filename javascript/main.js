@@ -38,8 +38,13 @@ window.addEventListener("load", function(event) {
       display.drawCurrentTetromino(game.world.getHardDropBlocks(), game.world.settings.ghostColor);
       display.drawCurrentTetromino(game.world.currentTetromino.getBlocks(), game.world.currentTetromino.getColor());
     }
+    if (game.world.previewQueue){
+      var previewSquence = game.world.previewQueue.previewDisplay();
+      for (var i=0;i<previewSquence.length; i++){
+        display.drawPreview(i, previewSquence[i].blocks, previewSquence[i].color)
+      }
+    }
     display.render();
-
   };
 
   var update = function() {
