@@ -44,6 +44,9 @@ window.addEventListener("load", function(event) {
         display.drawPreview(i, previewSquence[i].blocks, previewSquence[i].color)
       }
     }
+    if (game.world.currentHold){
+      display.drawHold(game.world.getHoldBlocks(), game.world.getHoldColor())
+    }
     display.render();
   };
 
@@ -83,6 +86,12 @@ window.addEventListener("load", function(event) {
                           game.world,
                           game.world.settings.hardDropAutoRepeatDelay,
                           game.world.settings.hardDropAutoRepeatInterval)
+
+    controller.autoRepeat(controller.shift,
+                          game.world.controlHold,
+                          game.world,
+                          99999,
+                          99999)
 
     game.update();
     

@@ -64,7 +64,10 @@ const Game = function() {
     lockDelayCount: 0,
     hardLockDelayCount: 0,
 
+    holdEnabled: true,
+
     currentTetromino: null,    // This value would be null when in spawn delay
+    currentHold: null,
 
     stage: 0,    // 0: for begining & init a new tetromino
                  // 1: normal drop 
@@ -144,7 +147,20 @@ const Game = function() {
       this.currentTetromino.pos[1] += this.getHardDropShift();
       this.attachTetromino();
     },
-    
+    controlHold: function(){
+      if (this.stage != 1) return;
+      if (this.holdEnabled == false) return;
+      if (this.currentHold == null) {
+        this.currentHold = this.currentTetromino;
+        this.initTetromino(this.settings.initPos)
+      } else {
+        var tmp = this.currentTetromino;
+        this.initTetromino(this.settings.initPos, this.currentHold)
+        this.currentHold = tmp;
+      }
+      this.holdEnabled = false;
+    },
+
 
     //////////////// ROUTINE ///////////////////////
     drop: function(tetromino) {
@@ -215,9 +231,17 @@ const Game = function() {
         this.blockStacked[i] = this.blockStacked[i-newLineShift];
       } 
     },
-    initTetromino: function(position) {
-      currentTetrominoId = this.previewQueue.pop()
-      this.currentTetromino = new Game.Tetromino(currentTetrominoId, position)
+    initTetromino: function(position, tetromino=null) {
+      if (tetromino == null) {
+        currentTetrominoId = this.previewQueue.pop()
+        this.currentTetromino = new Game.Tetromino(currentTetrominoId, position)
+      } else{
+        // tetromino.pos = position;
+        this.currentTetromino = tetromino;
+        this.currentTetromino.pos = [...position];
+        this.currentTetromino.direction = 0;
+      }
+
       if (this.isCollide(this.currentTetromino)) {
         this.stage = 5
         this.delayedCount = 0
@@ -230,8 +254,9 @@ const Game = function() {
     update: function() {
 
       if (this.stage == 0) {
-        this.previewQueue.pushNewTetrominos();
+        // this.previewQueue.pushNewTetrominos();
         this.initTetromino(this.settings.initPos)
+        this.holdEnabled = true;
       } 
       else if (this.stage == 1){
         if (this.delayedCount > this.settings.autoDropInterval){
@@ -273,10 +298,20 @@ const Game = function() {
     },
     getHardDropBlocks: function() {
       return this.currentTetromino.getBlocks([0, this.getHardDropShift()]);
-    }
+    },
+
+
+    //////////////// Hold ////////////////////
+    getHoldBlocks: function() {
+      return this.currentHold.rotatePosition[0];
+    },
+    getHoldColor: function() {
+      return this.currentHold.color
+    },
   };
 
   
+
 
   this.update = function() {
     this.world.update();
