@@ -215,12 +215,16 @@ const Game = function() {
     checkClear: function(height1, height2) {      // height2 should greater than height1
       var clearLineArray = [];
       for (var i=height1; i<=height2; i++) {
+        var isClear = true;
         for (var j = 0; j<this.settings.blockFieldWidth; j++) {
           if (this.blockStacked[i][j] == 0) {
+            isClear = false;
             break;
           } 
         }
-        clearLineArray.push(i);
+        if (isClear) {
+          clearLineArray.push(i);
+        }
       }
       if (clearLineArray.length) {
         this.clearLine(clearLineArray);
