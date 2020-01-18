@@ -26,6 +26,7 @@ const Game = function() {
       [9,0,0,0,0,0,0,0,0,0,0,9],
       [9,0,0,0,0,0,0,0,0,0,0,9],
       [9,0,0,0,0,0,0,0,0,0,0,9],
+      [9,0,0,0,0,0,0,0,0,0,0,9],
       [9,9,9,9,9,9,9,9,9,9,9,9]
     ],
 
@@ -34,15 +35,15 @@ const Game = function() {
       autoDropInterval: 7,
       autoRepeatDelay: 6,
       autoRepeatInterval: 1,
-      rotateAutoRepeatDelay: 8,
+      rotateAutoRepeatDelay: 12,
       rotateAutoRepeatInterval: 8,
       softDropAutoRepeatDelay: 1,
       softDropAutoRepeatInterval: 1,
       hardDropAutoRepeatDelay: 8  ,
       hardDropAutoRepeatInterval: 8,
-      lockDelay: 6,
-      hardLockDelay: 20,
-      lockTime: 5,
+      lockDelay: 3,
+      hardLockDelay: 10,
+      lockTime: 0,
       blockFieldWidth: 12,
       blockFieldHeight: 23,
       
@@ -140,7 +141,16 @@ const Game = function() {
     },
     controlSoftDrop: function(){
       if (this.stage != 1) return;
-      this.drop(this.currentTetromino);
+      
+      // The following code is same to the drop function except the `hardLockDelayCount` and `lockDelayCount` relative code
+      // Press the down key should not change the `hardLockDelayCount` and `lockDelayCount` value
+      if (!this.isCollide(this.currentTetromino, [0, 1], 0))  {
+        this.currentTetromino.pos[1] += 1;
+      }
+
+      if (this.lockDelayCount != 0) {
+        this.lockDelayCount = 0;
+      }
     },
     controlHardDrop: function(){
       if (this.stage != 1) return;
@@ -205,16 +215,12 @@ const Game = function() {
     checkClear: function(height1, height2) {      // height2 should greater than height1
       var clearLineArray = [];
       for (var i=height1; i<=height2; i++) {
-        var isClear = true;
         for (var j = 0; j<this.settings.blockFieldWidth; j++) {
           if (this.blockStacked[i][j] == 0) {
-            isClear = false;
             break;
           } 
         }
-        if (isClear) {
-          clearLineArray.push(i);
-        }
+        clearLineArray.push(i);
       }
       if (clearLineArray.length) {
         this.clearLine(clearLineArray);
@@ -228,7 +234,7 @@ const Game = function() {
           newLineShift++;
           j--;
         }
-        this.blockStacked[i] = this.blockStacked[i-newLineShift];
+        this.blockStacked[i] = [...this.blockStacked[i-newLineShift]];
       } 
     },
     initTetromino: function(position, tetromino=null) {
@@ -473,8 +479,8 @@ Game.colorTable = {
   3: "#ff00ff",     // T
   4: "#ff9900",     // J
   5: "#0000ff",     // L
-  6: "#ff3300",     // S
-  7: "#66ff33"      // Z
+  6: "#66ff33",     // S
+  7: "#ff3300"      // Z
 }
 
 Game.Tetromino = function(teriminoId, position){

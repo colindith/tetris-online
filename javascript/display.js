@@ -7,8 +7,8 @@ const Display = function(canvas) {
     3: "#ff00ff",     // T
     4: "#ff9900",     // J
     5: "#0000ff",     // L
-    6: "#ff3300",     // S
-    7: "#66ff33"      // Z
+    6: "#66ff33",     // S
+    7: "#ff3300"      // Z
   }
 
   this.buffer  = document.createElement("canvas").getContext("2d"),
@@ -25,7 +25,7 @@ const Display = function(canvas) {
     previewWidth = 2
     previewHeight = 2
 
-    for (i = 4; i<23; i++) {
+    for (i = 4; i<24; i++) {
       for (j = 0; j<12; j++) {
         if (blockStacked[i][j] == 0) {
           this.buffer.fillStyle = color;
