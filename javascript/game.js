@@ -27,6 +27,7 @@ const Game = function() {
       [9,0,0,0,0,0,0,0,0,0,0,9],
       [9,0,0,0,0,0,0,0,0,0,0,9],
       [9,0,0,0,0,0,0,0,0,0,0,9],
+      [9,9,9,9,9,9,9,9,9,9,9,9],
       [9,9,9,9,9,9,9,9,9,9,9,9]
     ],
 
@@ -42,7 +43,7 @@ const Game = function() {
       hardDropAutoRepeatDelay: 8  ,
       hardDropAutoRepeatInterval: 8,
       lockDelay: 3,
-      hardLockDelay: 10,
+      hardLockDelay: 8,
       lockTime: 0,
       blockFieldWidth: 12,
       blockFieldHeight: 23,
@@ -548,8 +549,7 @@ Game.Tetromino.prototype = {
   },
   getKickArray: function(rotate=1) {   // rotate must be 1 or -1
     kickIndex = (4 + this.direction + ((rotate-1)/2))%4
-    res = this.kick[kickIndex]
-    res.map(function(x) { return x*rotate; })
+    var res = this.kick[kickIndex].map(function(val, index) { return [val[0]*rotate, val[1]*rotate]; })
     return res
   }
 }
