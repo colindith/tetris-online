@@ -319,6 +319,8 @@ const Game = function() {
       this.currentTetromino = null;
       this.currentHold = null;
       // Here redefine the parameter of world. This is no good.
+
+      this.previewQueue.emptyItems();
     },
   };
 
@@ -368,8 +370,13 @@ Game.prototype = { constructor : Game };
 Game.PreviewQueue = function() {
   var items = [];
 	this.pushNewTetrominos = function() {
-    // TODO: implement this method
-    items.push(1,2,4,5,6,7,3);
+    new_tetrominos = [1,2,3,4,5,6,7];
+    for (let i = new_tetrominos.length - 1; i > 0; i--) {
+      let j = Math.floor(Math.random() * (i + 1));
+      [new_tetrominos[i], new_tetrominos[j]] = [new_tetrominos[j], new_tetrominos[i]];
+    }
+    items.push(...new_tetrominos);
+    
 	};
 	this.pop = function() {
     if (items.length < 7) {
@@ -390,6 +397,9 @@ Game.PreviewQueue = function() {
     }
     return res;
   };
+  this.emptyItems = function() {
+    items = [];
+  }
 }
 
 Game.rotatePositionTable = {
