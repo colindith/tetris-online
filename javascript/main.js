@@ -18,6 +18,16 @@ window.addEventListener("load", function(event) {
 
   };
 
+  var mouseClick = function(event) {
+    var canvas = document.querySelector("canvas")
+    var rect = canvas.getBoundingClientRect();
+    controller.mouseClick(
+      event.type, 
+      (event.clientX - rect.left) * game.world.width / canvas.width, 
+      (event.clientY - rect.top) * game.world.width / canvas.width, 
+      game)
+  }
+
   /* I also moved this handler out of Display since part 1 of this series. The reason
   being that I need to reference game as well as display to resize the canvas according
   to the dimensions of the game world. I don't want to reference game inside of my
@@ -47,6 +57,15 @@ window.addEventListener("load", function(event) {
     if (game.world.currentHold){
       display.drawHold(game.world.getHoldBlocks(), game.world.getHoldColor())
     }
+    display.drawScore();
+    // display.drawMouse(game.world.mousePosition);
+
+    if (game.world.stage == 10) {
+      display.drawButton(...game.world.title.gameStartRect, game.world.title.gameStartText)
+    } else if (game.world.stage == 5) {
+      display.drawButton(...game.world.title.goodGameRect, game.world.title.goodGameText)
+    }
+
     display.render();
   };
 
@@ -119,6 +138,7 @@ window.addEventListener("load", function(event) {
   window.addEventListener("keydown", keyDownUp);
   window.addEventListener("keyup",   keyDownUp);
   window.addEventListener("resize",  resize);
+  document.querySelector("canvas").addEventListener('click', mouseClick);
 
   resize();
 

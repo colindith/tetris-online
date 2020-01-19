@@ -27,13 +27,10 @@ const Game = function() {
 
     background_color:"rgba(40,48,56,0.25)",
 
-    friction:0.9,
-    gravity:3,
-
     previewQueue:new Game.PreviewQueue(),
 
-    height:72,
-    width:108,
+    height:288,
+    width:432,
 
     delayedCount: 0,
     lockDelayCount: 0,
@@ -44,7 +41,7 @@ const Game = function() {
     currentTetromino: null,    // This value would be null when in spawn delay
     currentHold: null,
 
-    stage: 0,    // 0: for begining & init a new tetromino
+    stage: 10,   // 0: for begining & init a new tetromino
                  // 1: normal drop 
                  // 2: tetromino has locked to the stack, in lock time
                  // 3: clear delay
@@ -52,7 +49,12 @@ const Game = function() {
                  // Note that for 1,2 currentTetromino should not be null, 
                  // thus the tetromino can be control by key board
                  // the stage idea is not good
+                 // 5: good game
+                 // 10: title page
+                 // 11: count down
+    mousePosition: [0, 0],
 
+    title: new Game.Title(432, 288),
 
     ////////////////// Initialize /////////////////////
     init: function(){
@@ -249,12 +251,13 @@ const Game = function() {
     },
     update: function() {
 
-      if (this.stage == 0) {
+      if (this.stage == 10) {
+        
+      } else if (this.stage == 0) {
         // this.previewQueue.pushNewTetrominos();
         this.initTetromino(this.settings.initPos)
         this.holdEnabled = true;
-      } 
-      else if (this.stage == 1){
+      } else if (this.stage == 1){
         if (this.delayedCount > this.settings.autoDropInterval){
           this.delayedCount = 0
           /* update keyboard event */
@@ -304,6 +307,19 @@ const Game = function() {
     getHoldColor: function() {
       return this.currentHold.color
     },
+
+    restartWorld: function() {
+      this.init();
+      this.delayedCount = 0;
+      this.lockDelayCount = 0;
+      this.hardLockDelayCount = 0;
+  
+      this.holdEnabled = true;
+  
+      this.currentTetromino = null;
+      this.currentHold = null;
+      // Here redefine the parameter of world. This is no good.
+    },
   };
 
 
@@ -314,6 +330,24 @@ const Game = function() {
   this.update = function() {
     this.world.update();
   };
+
+  this.mouseClick = function(clientX, clientY) {
+    console.log(clientX, clientY)
+    this.world.mousePosition = [clientX, clientY];
+    if (this.world.stage == 10) {
+      // game start title
+      if (this.world.title.posInTitle([clientX, clientY])) {
+        this.world.stage = 0;
+      }
+    } else if (this.world.stage == 5) {
+      // good game title
+      if (this.world.title.posInTitle([clientX, clientY])) {
+        this.world.stage = 0;
+        this.world.restartWorld();
+      }
+    }
+    
+  }
 
 };
 
@@ -539,4 +573,27 @@ Game.Tetromino.prototype = {
     var res = this.kick[kickIndex].map(function(val, index) { return [val[0]*rotate, val[1]*rotate]; })
     return res
   }
+}
+
+Game.Title = function(width, height) {
+  // console.log(width, height, this)
+  this.gameStartRect = [0, 0.4 * height, width, 0.2 * height];
+  this.gameStartText = "Game Start";
+
+  this.goodGameRect = [0, 0.4 * height, width, 0.2 * height];
+  this.goodGameText = "Good Game";
+
+  this.posInTitle = function(pos) {
+    if (pos[0] > this.gameStartRect[0] && pos[0] < this.gameStartRect[0] + this.gameStartRect[2] &&
+        pos[1] > this.gameStartRect[1] && pos[1] < this.gameStartRect[1] + this.gameStartRect[3]) {
+          return true;
+    }
+    return false;
+
+  };
+  // title 掛在game.world底下會拿不到game.world.width, height等，也不能控制game.stage
+  // This is no good:(
+
+
+
 }

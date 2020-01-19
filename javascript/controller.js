@@ -29,6 +29,10 @@ const Controller = function() {
 
   };
 
+  this.mouseClick = function(type, clientX, clientY, game) {
+    game.mouseClick(clientX, clientY);
+  }
+
   this.autoRepeat = function(buttonInput, action, world, autoRepeatDelay, autoRepeatInterval) {
     if (buttonInput.active && (buttonInput.delayCount == 0))  {
       action.call(world);
