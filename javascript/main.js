@@ -57,7 +57,7 @@ window.addEventListener("load", function(event) {
     if (game.world.currentHold){
       display.drawHold(game.world.getHoldBlocks(), game.world.getHoldColor())
     }
-    display.drawScore();
+    // display.drawScore();
     // display.drawMouse(game.world.mousePosition);
 
     if (game.world.stage == 10) {
