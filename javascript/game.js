@@ -332,7 +332,7 @@ const Game = function() {
   };
 
   this.mouseClick = function(clientX, clientY) {
-    console.log(clientX, clientY)
+    // console.log(clientX, clientY)
     this.world.mousePosition = [clientX, clientY];
     if (this.world.stage == 10) {
       // game start title
@@ -347,7 +347,18 @@ const Game = function() {
       }
     }
     
-  }
+  };
+  
+  this.controlEnter = function() {
+    if (this.world.stage == 10) {
+      // game start title
+      this.world.stage = 0;
+    } else if (this.world.stage == 5) {
+      // good game title
+      this.world.stage = 0;
+      this.world.restartWorld();
+    }
+  };
 
 };
 

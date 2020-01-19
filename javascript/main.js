@@ -111,6 +111,10 @@ window.addEventListener("load", function(event) {
                           game.world,
                           99999,
                           99999)
+    
+    if (controller.enter.active) {
+      game.controlEnter();
+    }
 
     game.update();
     
