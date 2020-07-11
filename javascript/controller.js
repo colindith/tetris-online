@@ -35,9 +35,9 @@ const Controller = function() {
     game.mouseClick(clientX, clientY);
   }
 
-  this.autoRepeat = function(buttonInput, action, world, autoRepeatDelay, autoRepeatInterval) {
+  this.autoRepeat = function(buttonInput, action, box, autoRepeatDelay, autoRepeatInterval) {
     if (buttonInput.active && (buttonInput.delayCount == 0))  {
-      action.call(world);
+      action.call(box);
       if (buttonInput.inAutoShift){
         buttonInput.delayCount = autoRepeatInterval
       } else {

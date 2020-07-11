@@ -1,4 +1,17 @@
 
+CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+  if (w < 2 * r) r = w / 2;
+  if (h < 2 * r) r = h / 2;
+  this.beginPath();
+  this.moveTo(x+r, y);
+  this.arcTo(x+w, y,   x+w, y+h, r);
+  this.arcTo(x+w, y+h, x,   y+h, r);
+  this.arcTo(x,   y+h, x,   y,   r);
+  this.arcTo(x,   y,   x+w, y,   r);
+  this.closePath();
+  return this;
+}
+
 const Display = function(canvas) {
   this.colorTable = {
     9: "#ffffff",     // edge
@@ -98,7 +111,30 @@ const Display = function(canvas) {
     this.buffer.fillStyle = gradient;
     this.buffer.font = "30px Verdana";
     this.buffer.fillText(text, x+120, y+height-17);
-  }
+  };
+
+  this.drawMenu = function() {
+    this.buffer.fillStyle = "#5d5c61";
+    // this.buffer.fillRect(Math.floor(330), Math.floor(-10), 30, 5);
+    this.buffer.roundRect(330, -10, 100, 30, 5).fill();
+
+    this.buffer.fillStyle = "#557a95";
+    this.buffer.font = "14px FontAwesome";
+    this.buffer.fillText("\uf013", 340, 15);
+
+  };
+
+  this.drawCountDown = function(count) {
+    // the count start from 0 to 90
+    this.buffer.fillStyle = "#ffe400";
+    
+    number = Math.ceil((90 - count) / 30);
+    
+    size = 40 - (count % 30 / 2)
+    console.log("number", number, size)
+    this.buffer.font = size + "px Verdana";
+    this.buffer.fillText(number, 155-size/2, 150+size/2);
+  };
 
   this.fill = function(color) {
 
@@ -107,7 +143,8 @@ const Display = function(canvas) {
 
   };
 
-  this.render = function() { this.context.drawImage(this.buffer.canvas, 0, 0, this.buffer.canvas.width, this.buffer.canvas.height, 0, 0, this.context.canvas.width, this.context.canvas.height); };
+  this.render = function() {
+     this.context.drawImage(this.buffer.canvas, 0, 0, this.buffer.canvas.width, this.buffer.canvas.height, 0, 0, this.context.canvas.width, this.context.canvas.height); };
 
   this.resize = function(width, height, height_width_ratio) {
 
