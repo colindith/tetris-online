@@ -321,7 +321,6 @@ Game.Box = function(gameObj) {
     this.checkClear(height1, height2);
   },
   this.checkClear = function(height1, height2) {      // height2 should greater than height1
-    // There is a unknown bug which sometimes a line is not cleared.
     var clearLineArray = [];
     for (var i=height1; i<=height2; i++) {
       var isClear = true;
@@ -342,12 +341,11 @@ Game.Box = function(gameObj) {
   this.clearLine = function(clearLineArray) {
     newLineShift = 0;
     for (var i=this.settings.blockFieldHeight; i>4; i--){
-      var j = i;
-      while (j == clearLineArray[clearLineArray.length - newLineShift - 1]){
+      if (i == clearLineArray[clearLineArray.length - newLineShift - 1]){
         newLineShift++;
-        j--;
+      } else {
+        this.blockStacked[i+newLineShift] = [...this.blockStacked[i]];
       }
-      this.blockStacked[i] = [...this.blockStacked[i-newLineShift]];
     } 
   },
 
